@@ -8,7 +8,6 @@ class Relations:
 			stri=re.findall(r"[\w']+",s)
 			print(type(s))
 			self.relations_dict[stri[0]]=Relation(s)
-		#print(relations_dict[stri[0]].relation[1].name)	
 
 
 class Constraints:
@@ -29,6 +28,7 @@ class Relation:
 		self.ppka=0
 		self.super_keys=[]
 		x=1
+		s=None
 		while x<=len(str)-5:
 			attribute=Constraints(str[x],str[x+1],str[x+2],str[x+3],str[x+4])
 			if(str[x+4]==True):
@@ -38,11 +38,13 @@ class Relation:
 				else:
 					s=s+"&"+str[x]
 			if(str[x+1]==True):
-				self.super_keys.append(str[x+1])			
+				self.super_keys.append(str[x])			
 			self.relation.append(attribute)
 			self.no=self.no+1
 			x=x+5
-		self.super_keys.append(s)	
+
+		if(s is not None):
+			self.super_keys.append(s)
 
 	def set_super_keys(self,s):
 		if s not in self.super_keys:
@@ -62,11 +64,30 @@ class functional_dependencies:
 		for s in str:
 			a,b=s.split("->")
 			a=a[1:len(a)-1]
+			ls=[]
+			ls.extend(a.split("&"))
+			ls = sorted(ls)
+			a=""
+			a='&'.join(ls)
 			b=b[1:len(b)-1]
 			c=[]
 			c=b.split(",")
-			self.fd_dict[a]=c
-			#print(a,fd_dict[a])
+			ls=[]
+			ls.extend(a.split("&"))
+			temp=[]
+			for ele in c:
+				if(ele not in ls):
+					temp.append(ele)
+			if(a in self.fd_dict and len(self.fd_dict[a])>0):
+				ls = self.fd_dict[a]
+				if(len(temp)>0):
+					for ele in temp:
+						if(ele not in ls):
+							ls.append(ele)
+				temp = ls
+			if(len(temp)>0):
+				self.fd_dict[a]=temp
+			#print(a,self.fd_dict[a])
 
 	def _set_composite(self,fds,relations,rname):
 		
@@ -92,11 +113,44 @@ class check_NF:
 		self.fds._set_composite(self.fds,self.relations,rname)
 		self.notvalid={}
 		self.rname=rname
-	def check_2nf(self):
-		vkeys=[]		
+
+	def getNF_fd(self,fd):
+		vkeys=[]
 		for key in self.relations.relations_dict[self.rname].super_keys:
 			vkeys.extend(key.split("&"))
-		#print(vkeys)	
+		k=0
+		c=0
+		cnf=4
+		for item in self.relations.relations_dict:
+			if(item==self.rname):
+				for key in self.relations.relations_dict[self.rname].super_keys:
+					pkeys=key.split("&")
+					fdkeys=fd.split("&")
+					if(fd==key or set(pkeys).issubset(set(fdkeys))):
+						cnf = min(cnf,4)
+
+					elif(set(fdkeys).issubset(set(pkeys))):
+						for ele in self.fds.fd_dict[fd]:
+							if ele not in vkeys:
+								self.notvalid[fd]=ele
+								cnf = min(cnf,1)
+						cnf = min(cnf,3)
+						self.notvalid[fd]=ele
+
+					else:
+						for ele in self.fds.fd_dict[fd]:
+							if ele not in vkeys:
+								self.notvalid[fd]=ele
+								cnf = min(cnf,2)
+						cnf=min(cnf,3)
+						self.notvalid[fd]=ele
+		return cnf
+
+	
+	def check_2nf(self):
+		vkeys=[]
+		for key in self.relations.relations_dict[self.rname].super_keys:
+			vkeys.extend(key.split("&"))
 		k=0
 		c=0
 		for item in self.relations.relations_dict:
@@ -104,9 +158,9 @@ class check_NF:
 				for fd in self.fds.fd_dict:
 					for key in self.relations.relations_dict[self.rname].super_keys:
 						pkeys=key.split("&")
-						fdkeys=fd.split("&")						
+						fdkeys=fd.split("&")			
 						if(fd==key):
-							k=1							
+							k=1			
 						elif set(fdkeys).issubset((set(pkeys))):
 							for x in self.fds.fd_dict[fd]:
 								if x not in vkeys:
@@ -118,11 +172,11 @@ class check_NF:
 		if(c>0):
 			return False
 		else:
-			return True						
+			return True				
 
 	def check_3nf(self):
 		
-		vkeys=[]		
+		vkeys=[]
 		for key in self.relations.relations_dict[self.rname].super_keys:
 			vkeys.extend(key.split("&"))
 		k=0
@@ -168,16 +222,34 @@ class check_NF:
 			return False
 		else:
 			return True
-				
-								
 
+	def get_nf(self):
+		if(self.check_2nf()==False):
+			return "1NF"
+		elif(self.check_3nf()==False):
+			return "2NF"
+		elif(self.check_bcnf()==False):
+			return "3NF"
+		return "BCNF"
+						
+	def check_each_fd(self):
+		thnf = 4
+		for fd in self.fds.fd_dict:
+			print(fd,self.fds.fd_dict[fd], end=" ")
+			print(self.getNF_fd(fd))
+			print()
+			thnf = min(self.getNF_fd(fd),thnf)
+		return thnf
 
 
 
 nf=check_NF("test")
-print (nf.check_2nf())
+print(nf.check_2nf())
 print(nf.check_3nf())
 print(nf.check_bcnf())
+print(nf.get_nf())
+print(nf.check_each_fd())
+print()
 for a in nf.notvalid:
 	print(a+"->"+nf.notvalid[a])
 

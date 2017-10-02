@@ -1,1 +1,1 @@
-{eid&pnum}->{hours,ename,ploc};{eid}->{ename};{pnum}->{eid}
+{eid&pnum}->{hours,ename,ploc};{eid&pnum}->{ename};{pnum&ploc}->{eid}

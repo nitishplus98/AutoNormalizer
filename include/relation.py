@@ -1,7 +1,7 @@
 import re
 class Relations:
 	def __init__(self):
-		file=open("./input/schema.txt","r")
+		file=open("schema.txt","r")
 		self.relations_dict={}
 		str=file.readlines()
 		for s in str:
@@ -55,7 +55,7 @@ class Relation:
 
 class functional_dependencies:
 	def __init__(self):
-		fd_file=open("./input/fd.txt","r")
+		fd_file=open("fd.txt","r")
 		self.fd_dict={}
 		fds=fd_file.readlines()
 		str=[]
@@ -84,7 +84,7 @@ class functional_dependencies:
 					for ele in temp:
 						if(ele not in ls):
 							ls.append(ele)
-				#print(a,self.fd_dict[a])
+				print(a,self.fd_dict[a])
 			
 				temp = ls
 			if(len(temp)>0):
@@ -242,3 +242,26 @@ class check_NF:
 			print()
 			thnf = min(self.getNF_fd(fd),thnf)
 		return thnf
+
+
+
+nf=check_NF("test")
+print(nf.check_2nf())
+print(nf.check_3nf())
+print(nf.check_bcnf())
+print(nf.get_nf())
+print(nf.check_each_fd())
+print()
+for a in nf.notvalid:
+	print(a+"->"+nf.notvalid[a])
+
+
+
+
+
+
+
+
+				
+
+	

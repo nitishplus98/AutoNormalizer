@@ -1,7 +1,8 @@
 import re
+import copy
 class Relations:
 	def __init__(self):
-		file=open("schema.txt","r")
+		file=open("input/schema.txt","r")
 		self.relations_dict={}
 		str=file.readlines()
 		for s in str:
@@ -40,7 +41,7 @@ class Relation:
 							elif(z in ppkeys)&('&' not in pkey):
 								ok=[y.name,'True',y.isNULL,y.isFK,'False']
 								str.extend(ok)
-								#print(z+"rtgye")	 
+								#print(z+"rtgye") 
 							else:
 								ok=[y.name,'False',y.isNULL,y.isFK,'False']
 								str.extend(ok)
@@ -50,8 +51,7 @@ class Relation:
 
 		else:
 			str=re.findall(r"[\w']+",s)	
-		#print(str)
-		#print("\n")	
+
 		self.relation=[]
 		self.no=0
 		self.ppka=0
@@ -85,7 +85,7 @@ class Relation:
 	def _set_fds_(self,rname,notvalid_dict=None):
 		#self.fd_dict=fd_dict
 		if notvalid_dict is None:
-			fd_file=open("fd.txt","r")			
+			fd_file=open("input/fd.txt","r")			
 			self.fd_dict[rname]={}
 			fds=fd_file.readlines()
 			str=[]
@@ -142,11 +142,10 @@ class Relation:
 class check_NF:
 	def __init__(self,rname,relations):
 		#self.fds=fds
-		self.relations=relations
+		self.relations=copy.deepcopy(relations)
 		self.relations.relations_dict[rname]._set_composite(self.relations,rname)
 		self.notvalid={}
 		self.rname=rname
-		#print("rname:"+self.rname)
 
 	def getNF_fd(self,fd):
 		vkeys=[]
@@ -188,8 +187,8 @@ class check_NF:
 		#print(self.relations.relations_dict[self.rname].super_keys)
 		#print("fhuer")
 		for key in self.relations.relations_dict[self.rname].super_keys:
-			#print("super key:"+key)
-			vkeys.extend(key.split("&"))
+			print("super key:"+key)
+			vkeys.extend(key.split("&"))  #list of keys.
 		k=0
 		c=0
 		for item in self.relations.relations_dict:
@@ -296,6 +295,8 @@ class check_NF:
 			print()
 			thnf = min(self.getNF_fd(fd),thnf)
 		return thnf
+
+		
 	def oneNF_to_2NF_3NF(self):
 		for key in self.relations.relations_dict:
 			l=0			
@@ -413,13 +414,17 @@ class check_NF:
 #fds=functional_dependencies(key)
 relations=Relations()
 relations.relations_dict["test"]._set_fds_("test")
-#print(relations.relations_dict[key].fd_dict[key])
+print("Initial dependencies")
+#print(relations.relations_dict["test"].fd_dict["test"])
 nf=check_NF("test",relations)
+pfds = copy.deepcopy(nf.relations.relations_dict["test"].fd_dict["test"])
+print(pfds)
 print(nf.check_2nf())
 print(nf.check_3nf())
-print(nf.check_bcnf())
+#(nf.check_bcnf())
 #print(nf.get_nf())
 #print(nf.check_each_fd())
+nf2=None
 for a in nf.notvalid:
 	print(a+"->[",end=" ")
 	for x in nf.notvalid[a]:
@@ -432,33 +437,150 @@ if not nf.check_2nf():
 		if not nf2.check_3nf():
 			nf2.oneNF_to_2NF_3NF()
 elif not nf.check_3nf():
-	nf.oneNF_to_2NF_3NF()	
+	nf.oneNF_to_2NF_3NF()
+
+print("hindustani")	
 for x in relations.relations_dict:
 	print(relations.relations_dict[x].fd_dict[x])
 	print(x+":",end=" ")
 	nf1=check_NF(x,relations)
 	print(nf1.check_2nf())
 	print(nf1.check_3nf())
-	print(nf1.check_bcnf())
-	print(nf1.get_nf())
-	print(nf1.check_each_fd())
+	#print(nf1.check_bcnf())
+	#print(nf1.get_nf())
+	#print(nf1.check_each_fd()
+	#print(str(nf.relations.relations_dict.keys()))	
 
-	
-	
-
-
-
-
-
-
-
-
+print("Decomposed relations")
+for ele in nf.relations.relations_dict.keys():
+	print(nf.relations.relations_dict[ele].fd_dict)
+	print(nf.relations.relations_dict[ele].super_keys)
+	for element in nf.relations.relations_dict[ele].relation:
+		print(element.name,end=" ")
+	print()
 
 
 
 
+class Decomposition_Properties:
+	def __init__(self,relations,pfd_dict):
+		self.relations = copy.deepcopy(relations)
+		self.pfd_dict = copy.deepcopy(pfd_dict)
 
-				
 
 
-	
+	"""
+	Computes the closure of a list of functional dependencies, by using Armstrong's inference rules repeatatively.
+
+	@param: list of functional dependencies.
+	@return value: Closure of fd list
+	"""
+	def getClosure(self,fds):
+		cdict={}
+		tlist=[]
+		#print(fds)
+		for ele in fds.keys():
+			if ele in cdict:
+				tlist = fds[ele]
+				#print(tlist)
+				tlist.extend(cdict[ele])
+				tlist = list(set(tlist))
+				cdict[ele]=tlist
+			else:
+				cdict[ele]=fds[ele]
+
+		#print(cdict)
+
+		klist = sorted(set(cdict.keys()));
+		for key in klist:
+			tlist = cdict[key]
+			ksplit = []
+			ksplit.extend(key.split("&"))
+			for ele in klist:
+				if(ele!=key):
+					elist=[]
+					elist.extend(ele.split("&"))
+					flag=True
+					for val in elist:
+						if(val not in ksplit):
+							flag=False
+							break
+					if(flag==True):
+						tlist.extend(cdict[ele])
+			tlist = list(set(tlist))
+			cdict[key]=tlist
+
+			for ele in klist:
+				if(ele!=key):
+					elist=[]
+					elist.extend(ele.split("&"))
+					#print(elist)
+					flag=True
+					for val in elist:
+						if(val not in tlist):
+							flag=False
+							break
+					if(flag==True):
+						tlist.extend(cdict[ele])
+
+			tlist = list(set(tlist))
+			cdict[key]=tlist
+		return cdict
+
+	# fd_dict={}
+	# fd_dict['a']=["b"]
+	# fd_dict['b']=["c"]
+	# fd_dict['c']=["d"]
+
+	# obj = Decomposition_Properties(nf.relations,None)
+	# print(obj.getClosure(fd_dict))
+
+
+	"""
+	Finds out if the given relational decomposition is dependency preserving.
+	"""
+	def lossless_join(self):
+		self.pfd_dict = self.getClosure(self.pfd_dict)
+		global_dict={}
+		print("each case")
+		tlist=[]
+		for key in self.relations.relations_dict.keys():
+			lfds = self.getClosure(self.relations.relations_dict[key].fd_dict[key])
+			print(lfds)
+			for ele in lfds:
+				if ele in global_dict:
+					tlist = global_dict[ele]
+					tlist.append(lfds[ele])
+					tlist = list(set(tlist))
+					global_dict[ele]=tlist
+
+				else:
+					global_dict[ele]=lfds[ele]
+
+		print("global")
+		global_dict = self.getClosure(global_dict)
+		print(global_dict)
+		print(self.pfd_dict)
+		#print(cmp(self.pfd_dict,global_dict))
+		for key in self.pfd_dict:
+			if(key not in global_dict):
+				return False
+			else:
+				l1 = self.pfd_dict[key]
+				l2 = global_dict[key]
+				if(len(l1)!=len(l2)):
+					return False
+				l1 = sorted(l1)
+				l2 = sorted(l2)
+				for i in range(len(l1)):
+					if(l1[i]!=l2[i]):
+						return False
+		return True
+
+
+obj = Decomposition_Properties(nf.relations,pfds)
+if(obj.lossless_join()):
+	print("The join is lossless")
+
+else:
+	print("Decomposition looses out some fds!")

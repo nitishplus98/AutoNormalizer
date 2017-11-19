@@ -539,7 +539,7 @@ class Decomposition_Properties:
 	"""
 	Finds out if the given relational decomposition is dependency preserving.
 	"""
-	def lossless_join(self):
+	def dependency_preserving_after(self):
 		self.pfd_dict = self.getClosure(self.pfd_dict)
 		global_dict={}
 		print("each case")
@@ -578,9 +578,99 @@ class Decomposition_Properties:
 		return True
 
 
+	def lossless_join_before(self):
+		self.pfd_dict = self.getClosure(self.pfd_dict)
+		alist = []
+		adict={}
+		tlist=[]
+		for key in self.relations.relations_dict.keys():
+			tlist=[]
+			for ele in self.relations.relations_dict[key].relation:
+				alist.append(ele.name)
+				tlist.append(ele.name)
+			adict[key]=set(tlist)
+
+		alist = list(sorted(set(alist)))
+		klist = sorted(self.relations.relations_dict.keys())
+		mats=[]
+		print(alist)
+		for key in klist:
+			row=[]
+			for ele in alist:
+				if ele in adict[key]:
+					row.append(1)
+				else:
+					row.append(0)
+			mats.append(row)
+		
+		chp = True
+		pfd_list=[]
+		for key in self.pfd_dict:
+			kl = []
+			kl.extend(key.split("&"))
+			print(kl)
+			for i in range(len(kl)):
+				kl[i] = alist.index(kl[i])
+
+			for ele in self.pfd_dict[key]:
+				ti = alist.index(ele)
+				if ti not in kl:
+					pfd_list.append((kl,alist.index(ele)))
+
+		# print(mats)
+		# print("Idhar")
+		while(chp==True):
+			chp=False
+			for ele in pfd_list:
+				rind=[]
+				#print(ele)
+				for j in range(len(mats)):
+					allone=True
+					for i in range(len(ele[0])):
+						if(mats[j][i]==0):
+							allone=False
+							break
+					if(allone==True):
+						rind.append(j)
+				
+				sflag = False
+				for j in range(len(rind)):
+					if(mats[rind[j]][ele[1]]==1):
+						sflag=True
+					else:
+						chp=True
+
+				if(sflag==True):
+					for j in range(len(rind)):
+						mats[rind[j]][ele[1]]=1
+
+
+		ans=False
+		for row in mats:
+			lflag=True
+			for ele in row:
+				if(ele==0):
+					lflag=False
+					break
+			if(lflag==True):
+				ans=True
+				break
+
+		return ans
+
+
+			
+
 obj = Decomposition_Properties(nf.relations,pfds)
-if(obj.lossless_join()):
-	print("The join is lossless")
+if(obj.dependency_preserving_after()):
+	print("The join is dependency preserving")
 
 else:
 	print("Decomposition looses out some fds!")
+
+
+if(obj.lossless_join_before()):
+	print("The decomposition is lossless join")
+
+else:
+	print("Decomposition is dependency preserving")

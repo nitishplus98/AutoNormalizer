@@ -1,5 +1,6 @@
 import re
 import copy
+import time
 class Relations:
 	def __init__(self):
 		file=open("input/schema.txt","r")
@@ -566,7 +567,7 @@ class Decomposition_Properties:
 			if(key not in global_dict):
 				return False
 			else:
-				l1 = self.pfd_dict[key]
+				l1 = copy.deepcopy(self.pfd_dict[key])
 				l2 = global_dict[key]
 				if(len(l1)!=len(l2)):
 					return False
@@ -617,8 +618,9 @@ class Decomposition_Properties:
 				if ti not in kl:
 					pfd_list.append((kl,alist.index(ele)))
 
-		# print(mats)
-		# print("Idhar")
+		print(pfd_list)
+		print(mats)
+		#print("Idhar")
 		while(chp==True):
 			chp=False
 			for ele in pfd_list:
@@ -627,23 +629,42 @@ class Decomposition_Properties:
 				for j in range(len(mats)):
 					allone=True
 					for i in range(len(ele[0])):
-						if(mats[j][i]==0):
+						if(mats[j][ele[0][i]]==0):
 							allone=False
 							break
 					if(allone==True):
 						rind.append(j)
 				
 				sflag = False
+				cflag = False
 				for j in range(len(rind)):
 					if(mats[rind[j]][ele[1]]==1):
 						sflag=True
 					else:
-						chp=True
+						cflag=True
+
+				if(cflag and sflag):
+					chp = True
 
 				if(sflag==True):
 					for j in range(len(rind)):
 						mats[rind[j]][ele[1]]=1
 
+			vrow=False
+			#print("period")
+			#print(mats)
+			for row in mats:
+				allone=True
+				for ele in row:
+					if(ele==0):
+						allone=False
+						break
+				if(allone):
+					vrow=True
+					break
+
+			if(vrow==True):
+				break
 
 		ans=False
 		for row in mats:
@@ -658,9 +679,6 @@ class Decomposition_Properties:
 
 		return ans
 
-
-			
-
 obj = Decomposition_Properties(nf.relations,pfds)
 if(obj.dependency_preserving_after()):
 	print("The join is dependency preserving")
@@ -670,7 +688,7 @@ else:
 
 
 if(obj.lossless_join_before()):
-	print("The decomposition is lossless join")
+	print("The decomposition has a lossless join")
 
 else:
-	print("Decomposition is dependency preserving")
+	print("Decomposition has a lossy join")

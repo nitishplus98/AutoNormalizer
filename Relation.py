@@ -127,6 +127,17 @@ class Relation:
 		
 		for item in relations.relations_dict:
 			if(item==rname):
+				if len(relations.relations_dict[item].fd_dict[item].keys())==0:
+					str=""
+					ct=0
+					for attr in relations.relations_dict[item].relation:
+						if(ct!=0):
+							str=str+'&'+attr.name
+						else:
+							str=attr.name
+						ct=ct+1
+					relations.relations_dict[rname].super_keys = []	
+					relations.relations_dict[rname].set_super_keys(str)
 				for fd in relations.relations_dict[item].fd_dict[rname]:
 					attr=[]
 					attr.extend(fd.split("&"))
@@ -422,9 +433,9 @@ class check_NF:
 					
 				#break
 				#print("hello")
-				for fd in self.notvalid[klist[i]]:
+				for fd in self.relations.relations_dict[klist[i]].fd_dict[klist[i]]:
 					k=0
-					#print(fd)
+					print(fd)
 					if '&' in fd:
 						l=fd.split('&')
 						for c in l:
@@ -756,7 +767,10 @@ if(nf.check_bcnf()==False):
 
 print("finally")
 for key in nf.relations.relations_dict:
+	nf.relations.relations_dict[key]._set_composite(relations=nf.relations,rname=key)
 	print(key,nf.relations.relations_dict[key].fd_dict[key],end=" ")
 	for ele in nf.relations.relations_dict[key].relation:
 		print(ele.name,end=" ")
+	print()
+	print(nf.relations.relations_dict[key].super_keys)
 print()

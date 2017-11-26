@@ -199,7 +199,7 @@ class check_NF:
 		#print(self.relations.relations_dict[self.rname].super_keys)
 		#print("fhuer")
 		for key in self.relations.relations_dict[self.rname].super_keys:
-			print("super key:"+key)
+			#print("super key:"+key)
 			vkeys.extend(key.split("&"))  #list of keys.
 		k=0
 		c=0
@@ -248,32 +248,61 @@ class check_NF:
 				for fd in self.relations.relations_dict[item].fd_dict[self.rname]:
 					if(item not in invalid_list.keys()):
 						invalid_list[item]={}
-					invalid_list[item][fd]=[]	
+					invalid_list[item][fd]=[]
+
+					# for key in self.relations.relations_dict[self.rname].super_keys:
+					# 	pkeys=key.split("&")
+					# 	fdkeys=fd.split("&")
+					# 	if(fd==key):
+					# 		k=1
+					# 	elif set(fdkeys).issubset(set(pkeys)):
+					# 		k=1
+					# 	else:
+					# 		for x in self.relations.relations_dict[item].fd_dict[self.rname][fd]:
+					# 			if x in vkeys:
+					# 				k=1
+					# 			else:
+					# 				#print(fd+" "+x)
+					# 				if x not in invalid_list[item][fd]:
+					# 					invalid_list[item][fd].append(x)
+					# 				k=0 
+					# 				c+=1
+					fdkeys=fd.split("&")
+					sflag = False
 					for key in self.relations.relations_dict[self.rname].super_keys:
 						pkeys=key.split("&")
-						fdkeys=fd.split("&")
 						if(fd==key):
 							k=1
-						elif set(fdkeys).issubset(set(pkeys)):
+							sflag = True
+							break
+						if set(fdkeys).issubset(set(pkeys)) and set(pkeys).issubset(set(fdkeys)):
 							k=1
-						else:
-							for x in self.relations.relations_dict[item].fd_dict[self.rname][fd]:
-								if x in vkeys:
-									k=1
-								else:
-									#print(fd+" "+x)
-									if x not in invalid_list[item][fd]:
-										invalid_list[item][fd].append(x)
-									k=0
-									c+=1
+							sflag = True
+							break
+					if(sflag==False):
+						for x in self.relations.relations_dict[item].fd_dict[self.rname][fd]:
+							if x in vkeys:
+								k=1
+							else:
+								#print(fd+" "+x)
+								if x not in invalid_list[item][fd]:
+									invalid_list[item][fd].append(x)
+								k=0
+								c+=1
+
 					if len(invalid_list[item][fd])==0:
 						invalid_list[item].pop(fd)
+		#print(self.relations.relations_dict.keys())
+		print(invalid_list)
 		for item in self.relations.relations_dict:
 			for key in invalid_list[item]:
+				if item not in self.notvalid.keys():
+					self.notvalid[item]={}
 				if key not in self.notvalid[item].keys():
 					self.notvalid[item][key]=copy.deepcopy(invalid_list[item][key])
 				else:
 					self.notvalid[item][key].extend(invalid_list[item][key])
+					self.notvalid[item][key] = list(set(self.notvalid[item][key]))
 
 		if(c>0):
 			return False
@@ -463,61 +492,7 @@ class check_NF:
 						if(mn==0):
 							del self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd][:]
 			self.relations.relations_dict[klist[i]].fd_dict[klist[i]]={k:v for k,v in self.relations.relations_dict[klist[i]].fd_dict[klist[i]].items() if not len(v)==0}	
-			i=i+1			
-
-
-
-
-
-
-#fds=functional_dependencies(key)
-relations=Relations()
-relations.relations_dict["test"]._set_fds_("test")
-print("Initial dependencies")
-#print(relations.relations_dict["test"].fd_dict["test"])
-nf=check_NF("test",relations)
-pfds = copy.deepcopy(nf.relations.relations_dict["test"].fd_dict["test"])
-print(pfds)
-print(nf.check_2nf())
-print(nf.check_3nf())
-print(nf.notvalid)
-#print(nf.check_bcnf())
-#print(nf.get_nf())
-#print(nf.check_each_fd())
-nf2=None
-for a in nf.notvalid:
-	print(a+"->[",end=" ")
-	for x in nf.notvalid[a]:
-		print(x,end=" ")
-	print("]")	
-if not nf.check_2nf():
-	nf.oneNF_to_2NF_3NF()
-	# for x in relations.relations_dict:
-	# 	nf2=check_NF(x,relations)
-	# 	if not nf2.check_3nf():
-	# 		nf2.oneNF_to_2NF_3NF()
-elif not nf.check_3nf():
-	nf.oneNF_to_2NF_3NF()
-
-
-for x in relations.relations_dict:
-	print(relations.relations_dict[x].fd_dict[x])
-	print(x+":",end=" ")
-	nf1=check_NF(x,relations)
-	print(nf1.check_2nf())
-	print(nf1.check_3nf())
-	#print(nf1.check_bcnf())
-	#print(nf1.get_nf())
-	#print(nf1.check_each_fd()
-	#print(str(nf.relations.relations_dict.keys()))	
-
-print("Decomposed relations")
-for ele in nf.relations.relations_dict.keys():
-	print(nf.relations.relations_dict[ele].fd_dict)
-	print(nf.relations.relations_dict[ele].super_keys)
-	for element in nf.relations.relations_dict[ele].relation:
-		print(element.name,end=" ")
-	print()
+			i=i+1
 
 
 
@@ -735,42 +710,3 @@ class Decomposition_Properties:
 				break
 
 		return ans
-
-
-obj = Decomposition_Properties(nf.relations,pfds)
-if(obj.dependency_preserving_after()):
-	print("The join is dependency preserving")
-
-else:
-	print("Decomposition looses out some fds!")
-
-
-if(obj.lossless_join_before()):
-	print("The decomposition has a lossless join")
-
-else:
-	print("Decomposition has a lossy join")
-
-for key in nf.relations.relations_dict:
-	print(key,nf.relations.relations_dict[key].fd_dict[key],end=" ")
-	for ele in nf.relations.relations_dict[key].relation:
-		print(ele.name,end=" ")
-
-print()
-
-print("dictionary")
-print(nf.notvalid)
-if(nf.check_bcnf()==False):
-	print(nf.relations.relations_dict["test"].fd_dict)
-	print(nf.notvalid)
-	nf.threeNF_to_BCNF()
-
-print("finally")
-for key in nf.relations.relations_dict:
-	nf.relations.relations_dict[key]._set_composite(relations=nf.relations,rname=key)
-	print(key,nf.relations.relations_dict[key].fd_dict[key],end=" ")
-	for ele in nf.relations.relations_dict[key].relation:
-		print(ele.name,end=" ")
-	print()
-	print(nf.relations.relations_dict[key].super_keys)
-print()

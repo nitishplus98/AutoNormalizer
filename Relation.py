@@ -86,7 +86,7 @@ class Relation:
 	def _set_fds_(self,rname,notvalid_dict=None):
 		#self.fd_dict=fd_dict
 		if notvalid_dict is None:
-			fd_file=open("input/fd2.txt","r")			
+			fd_file=open("input/fd.txt","r")			
 			self.fd_dict[rname]={}
 			fds=fd_file.readlines()
 			str=[]
@@ -373,9 +373,9 @@ class check_NF:
 				list_of_attribute.extend(self.notvalid[key][x])		
 				l+=1	
 				strin=key+str(l)
-				print("lstofatr")
-				print(list_of_attribute)
-				print(x)
+				#print("lstofatr")
+				#print(list_of_attribute)
+				#print(x)
 				self.relations.relations_dict[strin]=Relation(rname=strin,list_of_attributes=list_of_attribute,relation_obj=self.relations.relations_dict[key],pkey=x)
 				for y in self.notvalid[key][x]:
 					for z in self.relations.relations_dict[key].relation:
@@ -464,7 +464,7 @@ class check_NF:
 				#print("hello")
 				for fd in self.relations.relations_dict[klist[i]].fd_dict[klist[i]]:
 					k=0
-					print(fd)
+					#print(fd)
 					if '&' in fd:
 						l=fd.split('&')
 						for c in l:
@@ -577,11 +577,11 @@ class Decomposition_Properties:
 	def dependency_preserving_after(self):
 		self.pfd_dict = self.getClosure(self.pfd_dict)
 		global_dict={}
-		print("each case")
+		#print("each case")
 		tlist=[]
 		for key in self.relations.relations_dict.keys():
 			lfds = self.getClosure(self.relations.relations_dict[key].fd_dict[key])
-			print(lfds)
+			#print(lfds)
 			for ele in lfds:
 				if ele in global_dict:
 					tlist = global_dict[ele]
@@ -592,10 +592,10 @@ class Decomposition_Properties:
 				else:
 					global_dict[ele]=lfds[ele]
 
-		print("global")
+		#print("global")
 		global_dict = self.getClosure(global_dict)
-		print(global_dict)
-		print(self.pfd_dict)
+		#print(global_dict)
+		#print(self.pfd_dict)
 		#print(cmp(self.pfd_dict,global_dict))
 		for key in self.pfd_dict:
 			if(key not in global_dict):
@@ -628,7 +628,7 @@ class Decomposition_Properties:
 		alist = list(sorted(set(alist)))
 		klist = sorted(self.relations.relations_dict.keys())
 		mats=[]
-		print(alist)
+		#print(alist)
 		for key in klist:
 			row=[]
 			for ele in alist:
@@ -643,7 +643,7 @@ class Decomposition_Properties:
 		for key in self.pfd_dict:
 			kl = []
 			kl.extend(key.split("&"))
-			print(kl)
+			#print(kl)
 			for i in range(len(kl)):
 				kl[i] = alist.index(kl[i])
 
@@ -652,8 +652,8 @@ class Decomposition_Properties:
 				if ti not in kl:
 					pfd_list.append((kl,alist.index(ele)))
 
-		print(pfd_list)
-		print(mats)
+		#print(pfd_list)
+		#print(mats)
 		#print("Idhar")
 		while(chp==True):
 			chp=False

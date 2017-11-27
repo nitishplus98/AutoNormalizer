@@ -71,6 +71,7 @@ if(flag):
 	print("",end=" ")
 	print("done")
 	print("----------------------------------------------")
+	sleep(0.3)
 	print("Relational Schema: ")
 	for key in nf.relations.relations_dict.keys():
 		print(key,end=" =	R(")
@@ -81,7 +82,8 @@ if(flag):
 			else:
 				print(", "+element.name,end="")
 			i=i+1
-		print(")")
+		print(")", end="; keys: ")
+		print(nf.relations.relations_dict[key].super_keys)
 	print()
 	print("Functional Dependencies:")
 	for key in nf.relations.relations_dict.keys():
@@ -92,7 +94,6 @@ if(flag):
 	print()
 
 	obj = Decomposition_Properties(nf.relations,pfds)
-	obj = Decomposition_Properties(nf.relations,pfds)
 	print("----------------------------------------------")
 	print("F-closure for the original relation: " )
 	print("----------------------------------------------")
@@ -101,8 +102,63 @@ if(flag):
 		print(kv+" ---> "+str(clos[kv]))
 
 	print()
+	print("----------------------------------------------")
+	print("Properties of Relational Decomposition: " )
+	print("----------------------------------------------")
+	print("Dependency preserving: "+str(obj.dependency_preserving_after()))
+	print("Lossless join: "+str(obj.lossless_join_before()))
+
+else:
+	print("Schema in 3NF")
 
 
+print()
+if nf.check_bcnf()==False:
+	nf.threeNF_to_BCNF()
+	print("----------------------------------------------")
+	i=0
+	print("Converting to BCNF", end=" ")
+	while i<=5:
+		sys.stdout.flush()
+		sleep(0.09)
+		print(".",end="")
+		i=i+1
+	print("",end=" ")
+	print("done")
+	print("----------------------------------------------")
+	sleep(0.3)
+	print("Relational Schema: ")
+	for key in nf.relations.relations_dict.keys():
+		print(key,end=" =	R(")
+		i=0
+		for element in nf.relations.relations_dict[key].relation:
+			if(i==0):
+				print(element.name,end="")
+			else:
+				print(", "+element.name,end="")
+			i=i+1
+		print(")", end="; keys: ")
+		print(nf.relations.relations_dict[key].super_keys)
+	print()
+	print("Functional Dependencies:")
+	for key in nf.relations.relations_dict.keys():
+		print(key,end=" : ")
+		for kv in nf.relations.relations_dict[key].fd_dict[key]:
+			print(kv+" ---> "+str(nf.relations.relations_dict[key].fd_dict[key][kv]), end="; ")
+		print()
+	print()
+	obj = Decomposition_Properties(nf.relations,pfds)
+	print("----------------------------------------------")
+	print("Properties of Relational Decomposition: " )
+	print("----------------------------------------------")
+	print("Dependency preserving: "+str(obj.dependency_preserving_after()))
+	print("Lossless join: "+str(obj.lossless_join_before()))
+	print()
+
+
+
+else:
+	print("Relation already in BCNF")
 
 
 

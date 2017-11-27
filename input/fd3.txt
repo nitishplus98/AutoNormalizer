@@ -1,0 +1,1 @@
+{Prop}->{Country_name,Lot,Area,Price,Tax_rate};{Country_name&Lot}->{Prop,Area,Price,Tax_rate};{Country_name}->{Tax_rate};{Area}->{Price}

@@ -1,0 +1,1 @@
+test[(Prop,True,False,False,False),(Country_name,False,Fasle,False,False),(Lot,False,False,False,False),(Area,False,False,False,False),(Price,False,False,False,False),(Tax_rate,False,False,False,False)]

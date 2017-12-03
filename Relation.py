@@ -3,7 +3,7 @@ import copy
 import time
 class Relations:
 	def __init__(self):
-		file=open("input/schema.txt","r")
+		file=open("input/schema3.txt","r")
 		self.relations_dict={}
 		str=file.readlines()
 		for s in str:
@@ -38,16 +38,12 @@ class Relation:
 							if (z in ppkeys)&('&' in pkey):
 								ok=[y.name,'False',y.isNULL,y.isFK,'True']
 								str.extend(ok)
-								#print(z+"uyeur")
 							elif(z in ppkeys)&('&' not in pkey):
 								ok=[y.name,'True',y.isNULL,y.isFK,'False']
 								str.extend(ok)
-								#print(z+"rtgye") 
 							else:
 								ok=[y.name,'False',y.isNULL,y.isFK,'False']
 								str.extend(ok)
-			#print(str)
-			#print("abracadabra")					
 
 
 		else:
@@ -73,20 +69,16 @@ class Relation:
 			self.relation.append(attribute)
 			self.no=self.no+1
 			x=x+5
-		#print("hello")	
-		#print(self.super_keys)	
 		if(s is not None):
 			self.super_keys.append(s)
 
 	def set_super_keys(self,s):
 		if s not in self.super_keys:
-			#print("super key"+s)
 			self.super_keys.append(s)
 
 	def _set_fds_(self,rname,notvalid_dict=None):
-		#self.fd_dict=fd_dict
 		if notvalid_dict is None:
-			fd_file=open("input/fd.txt","r")			
+			fd_file=open("input/fd3.txt","r")			
 			self.fd_dict[rname]={}
 			fds=fd_file.readlines()
 			str=[]
@@ -118,7 +110,6 @@ class Relation:
 					temp = ls
 				if(len(temp)>0):
 					self.fd_dict[rname][a]=temp
-				#print(a,self.fd_dict[rname][a])
 		else:
 			self.fd_dict[rname]={}
 			self.fd_dict[rname].update(notvalid_dict)	
@@ -144,9 +135,7 @@ class Relation:
 					if(len(attr)+len(relations.relations_dict[item].fd_dict[rname][fd])==relations.relations_dict[rname].no):
 						str=""
 						str='&'.join(attr)
-						#print(str,attr)
 						relations.relations_dict[rname].set_super_keys(str)
-					#print(fds.fd_dict[fd])
 
 
 
@@ -189,18 +178,13 @@ class check_NF:
 								cnf = min(cnf,2)
 						cnf=min(cnf,3)
 						self.notvalid[fd].append(ele)
-			'''if len(self.notvalid[fd])==0:
-				self.notvalid.pop(fd)'''			
 		return cnf
 
 	
 	def check_2nf(self):
 		vkeys=[]
-		#print(self.relations.relations_dict[self.rname].super_keys)
-		#print("fhuer")
 		for key in self.relations.relations_dict[self.rname].super_keys:
-			#print("super key:"+key)
-			vkeys.extend(key.split("&"))  #list of keys.
+			vkeys.extend(key.split("&"))
 		k=0
 		c=0
 		for item in self.relations.relations_dict:
@@ -225,10 +209,7 @@ class check_NF:
 						else:
 							k=1
 					if len(self.notvalid[item][fd])==0:
-						self.notvalid[item].pop(fd)		
-		'''for x in self.notvalid:
-			if len(self.notvalid[x])==0:
-				self.notvalid.pop(x)'''					
+						self.notvalid[item].pop(fd)						
 		if(c>0):
 			return False
 		else:
@@ -239,61 +220,39 @@ class check_NF:
 		vkeys=[]
 		for key in self.relations.relations_dict[self.rname].super_keys:
 			vkeys.extend(key.split("&"))
-			#print(vkeys)
 		k=0
 		c=0
 		invalid_list={}
 		for item in self.relations.relations_dict:
-			if(item==self.rname):
-				for fd in self.relations.relations_dict[item].fd_dict[self.rname]:
-					if(item not in invalid_list.keys()):
-						invalid_list[item]={}
-					invalid_list[item][fd]=[]
+			for fd in self.relations.relations_dict[item].fd_dict[item]:
+				if(item not in invalid_list.keys()):
+					invalid_list[item]={}
+				invalid_list[item][fd]=[]
 
-					# for key in self.relations.relations_dict[self.rname].super_keys:
-					# 	pkeys=key.split("&")
-					# 	fdkeys=fd.split("&")
-					# 	if(fd==key):
-					# 		k=1
-					# 	elif set(fdkeys).issubset(set(pkeys)):
-					# 		k=1
-					# 	else:
-					# 		for x in self.relations.relations_dict[item].fd_dict[self.rname][fd]:
-					# 			if x in vkeys:
-					# 				k=1
-					# 			else:
-					# 				#print(fd+" "+x)
-					# 				if x not in invalid_list[item][fd]:
-					# 					invalid_list[item][fd].append(x)
-					# 				k=0 
-					# 				c+=1
-					fdkeys=fd.split("&")
-					sflag = False
-					for key in self.relations.relations_dict[self.rname].super_keys:
-						pkeys=key.split("&")
-						if(fd==key):
+				fdkeys=fd.split("&")
+				sflag = False
+				for key in self.relations.relations_dict[item].super_keys:
+					pkeys=key.split("&")
+					if(fd==key):
+						k=1
+						sflag = True
+						break
+					if set(fdkeys).issubset(set(pkeys)) and set(pkeys).issubset(set(fdkeys)):
+						k=1
+						sflag = True
+						break
+				if(sflag==False):
+					for x in self.relations.relations_dict[item].fd_dict[item][fd]:
+						if x in vkeys:
 							k=1
-							sflag = True
-							break
-						if set(fdkeys).issubset(set(pkeys)) and set(pkeys).issubset(set(fdkeys)):
-							k=1
-							sflag = True
-							break
-					if(sflag==False):
-						for x in self.relations.relations_dict[item].fd_dict[self.rname][fd]:
-							if x in vkeys:
-								k=1
-							else:
-								#print(fd+" "+x)
-								if x not in invalid_list[item][fd]:
-									invalid_list[item][fd].append(x)
-								k=0
-								c+=1
+						else:
+							if x not in invalid_list[item][fd]:
+								invalid_list[item][fd].append(x)
+							k=0
+							c+=1
 
-					if len(invalid_list[item][fd])==0:
-						invalid_list[item].pop(fd)
-		#print(self.relations.relations_dict.keys())
-		print(invalid_list)
+				if len(invalid_list[item][fd])==0:
+					invalid_list[item].pop(fd)
 		for item in self.relations.relations_dict:
 			for key in invalid_list[item]:
 				if item not in self.notvalid.keys():
@@ -316,9 +275,7 @@ class check_NF:
 
 	def check_bcnf(self):
 		c=0
-		#print(self.relations.relations_dict.keys())
 		for item in self.relations.relations_dict:
-			#print(self.relations.relations_dict[item].fd_dict[self.rname])
 			for fd in self.relations.relations_dict[item].fd_dict[item]:
 				if fd not in self.relations.relations_dict[item].super_keys:
 					for x in self.relations.relations_dict[item].fd_dict[item][fd]:
@@ -328,13 +285,7 @@ class check_NF:
 							self.notvalid[item][fd]=[]
 						if x not in self.notvalid[item][fd]:
 							self.notvalid[item][fd].append(x)
-						c+=1
-			# if item in self.notvalid.keys():
-			# 	print("not", end=" ")
-			# 	print(item,self.notvalid[item])
-			'''if len(self.notvalid[fd])==0:
-				self.notvalid.pop(fd)'''
-		#print(self.notvalid)				
+						c+=1				
 		if(c>0):
 			return False
 		else:
@@ -373,9 +324,6 @@ class check_NF:
 				list_of_attribute.extend(self.notvalid[key][x])		
 				l+=1	
 				strin=key+str(l)
-				#print("lstofatr")
-				#print(list_of_attribute)
-				#print(x)
 				self.relations.relations_dict[strin]=Relation(rname=strin,list_of_attributes=list_of_attribute,relation_obj=self.relations.relations_dict[key],pkey=x)
 				for y in self.notvalid[key][x]:
 					for z in self.relations.relations_dict[key].relation:
@@ -386,27 +334,16 @@ class check_NF:
 					x1.isPKA=False
 					x1.isPPKA=False
 
-				#fds1=functional_dependencies(strin,self.notvalid[key])
 				keylo={}
 				keylo[x]=self.notvalid[key][x]
 				self.relations.relations_dict[strin]._set_fds_(strin,keylo)
-				#print("strin:"+strin)
-				#nf=check_NF(strin,self.relations)
-				#print(nf.check_2nf())
 			break
-		#fds=functional_dependencies(key)
 		for a in self.notvalid[self.rname]:
-			#print("a:"+a)
 			for b in self.notvalid[self.rname][a]:
 				for fd in self.relations.relations_dict[key].fd_dict[key]:
-					#print(self.relations.relations_dict[key].fd_dict[key][fd])
-					#print("notvalid[a]:"+b)
 					if b in self.relations.relations_dict[key].fd_dict[key][fd]:
-						self.relations.relations_dict[key].fd_dict[key][fd].remove(b)
-						#print("fd:"+fd)		
-		self.relations.relations_dict[key].fd_dict[key]={k:v for k,v in self.relations.relations_dict[key].fd_dict[key].items() if not len(v)==0}			
-		#nf1=check_NF(key,self.relations)
-		#print(nf1.check_2nf())
+						self.relations.relations_dict[key].fd_dict[key][fd].remove(b)	
+		self.relations.relations_dict[key].fd_dict[key]={k:v for k,v in self.relations.relations_dict[key].fd_dict[key].items() if not len(v)==0}
 
 	"""
 	Precondition: The Relational Schema at least satisfies the third normal form.
@@ -414,14 +351,9 @@ class check_NF:
 	def threeNF_to_BCNF(self):
 		self.notvalid={}
 		self.check_bcnf()
-		#print("hdhd")
-		#print(self.relations.relations_dict.keys(),self.notvalid.keys(), self.notvalid["test"])
-		# print("here\n\n")
-		# print(self.notvalid.keys())
 		l=len(self.relations.relations_dict.keys())
 		i=0
 		klist = list(self.relations.relations_dict.keys())
-		#print(klist)
 		size = len(klist)
 		while i < size:
 			if klist[i] in self.notvalid.keys():	
@@ -436,7 +368,6 @@ class check_NF:
 					list_of_attribute.extend(self.notvalid[klist[i]][x])	
 					l+=1
 					strin=klist[i]+str(l)
-					#print("idhar",x,self.notvalid[klist[i]],end=" ")
 					self.relations.relations_dict[strin]=Relation(rname=strin,list_of_attributes=list_of_attribute,relation_obj=self.relations.relations_dict[klist[i]],pkey=x)
 					for y in self.notvalid[klist[i]][x]:
 						if '&' in x:
@@ -448,7 +379,6 @@ class check_NF:
 						else:
 							if x!=y:
 								for z in self.relations.relations_dict[klist[i]].relation:
-									#print("idhar",x,y,klist[i],z.name)
 									if(z.name==y):
 										self.relations.relations_dict[klist[i]].relation.remove(z)
 
@@ -457,14 +387,9 @@ class check_NF:
 						x1.isPPKA=False			
 					keylo={}
 					keylo[x]=self.notvalid[klist[i]][x]
-					#print(klist[i],self.notvalid[klist[i]])
-					self.relations.relations_dict[strin]._set_fds_(strin,keylo)				
-					
-				#break
-				#print("hello")
+					self.relations.relations_dict[strin]._set_fds_(strin,keylo)
 				for fd in self.relations.relations_dict[klist[i]].fd_dict[klist[i]]:
 					k=0
-					#print(fd)
 					if '&' in fd:
 						l=fd.split('&')
 						for c in l:
@@ -476,6 +401,7 @@ class check_NF:
 								k=1		
 								break
 						if(k==1):
+							
 							del self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd][:]
 					else:
 						mn=0
@@ -483,14 +409,18 @@ class check_NF:
 							if (fd==x.name):
 								mn=1
 						if(mn==0):
-							del self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd][:]		
-					for y in self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd]:
-						mn=0
-						for x in self.relations.relations_dict[klist[i]].relation:
-							if(y==x.name):
-								mn=1
-						if(mn==0):
+							
 							del self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd][:]
+					ind = 0
+					while (ind < len(self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd])):
+						mn = 0
+						for x in self.relations.relations_dict[klist[i]].relation:
+							if(self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd][ind]==x.name):
+								mn = 1
+						if(mn==0):
+							self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd].pop(ind)
+						else:
+							ind = ind + 1
 			self.relations.relations_dict[klist[i]].fd_dict[klist[i]]={k:v for k,v in self.relations.relations_dict[klist[i]].fd_dict[klist[i]].items() if not len(v)==0}	
 			i=i+1
 
@@ -513,7 +443,6 @@ class Decomposition_Properties:
 	def getClosure(self,fds):
 		cdict={}
 		tlist=[]
-		#print(fds)
 		for ele in fds.keys():
 			if ele in cdict:
 				tlist = fds[ele]
@@ -523,8 +452,6 @@ class Decomposition_Properties:
 				cdict[ele]=tlist
 			else:
 				cdict[ele]=fds[ele]
-
-		#print(cdict)
 
 		klist = sorted(set(cdict.keys()));
 		for key in klist:
@@ -549,7 +476,6 @@ class Decomposition_Properties:
 				if(ele!=key):
 					elist=[]
 					elist.extend(ele.split("&"))
-					#print(elist)
 					flag=True
 					for val in elist:
 						if(val not in tlist):
@@ -561,15 +487,6 @@ class Decomposition_Properties:
 			tlist = list(set(tlist))
 			cdict[key]=tlist
 		return cdict
-
-	# fd_dict={}
-	# fd_dict['a']=["b"]
-	# fd_dict['b']=["c"]
-	# fd_dict['c']=["d"]
-
-	# obj = Decomposition_Properties(nf.relations,None)
-	# print(obj.getClosure(fd_dict))
-
 
 	"""
 	Finds out if the given relational decomposition is dependency preserving.
@@ -592,11 +509,7 @@ class Decomposition_Properties:
 				else:
 					global_dict[ele]=lfds[ele]
 
-		#print("global")
 		global_dict = self.getClosure(global_dict)
-		#print(global_dict)
-		#print(self.pfd_dict)
-		#print(cmp(self.pfd_dict,global_dict))
 		for key in self.pfd_dict:
 			if(key not in global_dict):
 				return False
@@ -628,7 +541,6 @@ class Decomposition_Properties:
 		alist = list(sorted(set(alist)))
 		klist = sorted(self.relations.relations_dict.keys())
 		mats=[]
-		#print(alist)
 		for key in klist:
 			row=[]
 			for ele in alist:
@@ -652,9 +564,6 @@ class Decomposition_Properties:
 				if ti not in kl:
 					pfd_list.append((kl,alist.index(ele)))
 
-		#print(pfd_list)
-		#print(mats)
-		#print("Idhar")
 		while(chp==True):
 			chp=False
 			for ele in pfd_list:

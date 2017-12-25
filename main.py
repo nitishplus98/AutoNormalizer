@@ -2,8 +2,12 @@ from Relation import *
 from time import sleep
 import sys
 #fds=functional_dependencies(key)
-relations=Relations()
-relations.relations_dict["test"]._set_fds_("test")
+file = open("input/schema.txt","r")
+relations=Relations(file.readlines())
+file.close()
+file = open("input/fd.txt","r")
+relations.relations_dict["test"]._set_fds_("test",sinput=file.readlines())
+file.close()
 print("----------------------------------------------")
 print("Attributes of the relation provided as Input: ")
 print("----------------------------------------------")
@@ -43,7 +47,7 @@ print("----------------------------------------------")
 for key in relations.relations_dict.keys():
 	print(key,end=": ")
 	for a in nf.notvalid[key]:
-		print(a+"->[",end=" ")
+		print(a+" ---> [",end=" ")
 		for x in nf.notvalid[key][a]:
 			print(x,end=" ")
 		print("]")

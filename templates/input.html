@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <title>Project</title> 
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet"> 
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ 
+</head>
+ 
+<body>
+    <br>
+ 
+    <div class="container">
+        <div class="header">
+            <nav>
+                <div style="background-color:#c5ccd8" class="well" align="center">
+                <h2 class="text-info"><font face="Bookman" color="#00006e"><b>Relational Database Normalization</b></font></h3>
+            </div>
+            </nav>
+        </div>
+        
+        <!--<h1>Bucket List App</h1>-->
+        <!-- <form>
+            <div class="form-group">
+                <label for="pwd">Password:</label>
+                <input type="password" class="form-control" id="pwd" placeholder="Enter password">
+                <span class="help-block">This is some help text to a new line and may extend more than one line.</span>
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+        </form> -->
+        <form action="/properties" method="post">
+            <div class="form-group">
+                <label for="schema"><strong>Relational Schema     : </strong></label>
+                <textarea type="text" rows=3 class="form-control" name="schema" placeholder="For eg: test[(A,False,False,False,False),(B,False,Fasle,False,False),(C,False,False,False,False),(D,False,False,False,False)]"></textarea>
+                {% raw %}
+                <span class="help-block">Input must be of the form: <br> &lt;Line&gt; ---> &lt;Relation Name&gt;[&lt;Tuples&gt;]; <br>
+                &lt;Tuples&gt; ---> &lt;Tuple&gt; | &lt;Tuple&gt;,&lt;Tuples&gt; <br>
+                &lt;Tuple&gt; ---> (&lt; attrbute name &gt;, &lt; isPrimaryKey &gt;, &lt; isNULL &gt;, &lt; isForeignKey &gt;, &lt; isKey &gt;) <br> 
+                with each line corresponding to schema of one relation in the database </span>
+                {% endraw %}
+                <br>
+            </div>
+            <div class="form-group">
+                <label for="fds"><strong>Functional Dependencies   : </strong></label>
+                <textarea type="text" rows=3 class="form-control" name="fds" placeholder="For eg: {A&B}->{C,D};{C}->{B};{B}->{D}"></textarea>
+                {% raw %}
+                <span class="help-block"> Input consits of several lines, each specifying FDs for a relation in the schema.
+                    Input format for each line: <br> &lt;Line&gt; ---> &lt;Fds&gt;&lt;Fd&gt; <br>
+                    &lt;Fds&gt; ---> empty | &lt;Fd&gt;;&lt;Fds&gt; <br>
+                    &lt;Fd&gt; ---> {&lt;Lattributes&gt;}->{&lt;Ratttributes&gt;} <br> 
+                    &lt;Lattributes&gt; ---> &lt;attrbute_name&gt; | &lt;attrbute_name&gt;&amp;&lt;Lattributes&gt; <br>
+                    &lt;Ratttributes&gt; ---> &lt;attribute_name&gt; | &lt;attribute_name&gt;,&lt;Ratttributes&gt; <br>
+                </span>
+                {% endraw %}
+                <br>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-success"> Normalize </button>
+            </div>
+        </form>
+        <footer class="footer">
+            <p>Hosted locally@127.0.0.1:5000</p>
+        </footer>
+ 
+    </div>
+</body>
+ 
+</html>

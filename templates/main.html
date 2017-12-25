@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Database Design</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+  th,td
+  {
+  	padding-left: 15px;
+  	padding-right: 15px;
+  	padding-top: 5px;
+  	padding-bottom: 5px;
+  	border-spacing: 90px;
+  	background-color: #737477;
+  	border-width: 3px;
+  	border-color: black
+  }
+  body 
+  {
+      position: relative; 
+  }
+  #section1 {padding-top:50px;color: #fff; background-color: #c43e27;}
+  #section2 {padding-top:25px;color: #fff; background-color: #ddad0f;}
+  {% if res['cvt']>=1 %}
+  #section4 {padding-top:25px;color: #fff; background-color: #5a5c60;}
+  #section5 {padding-top:25px;color: #fff; background-color: #aa4b33;}
+  {% if res['cvt']==2 %}
+  #section6 {padding-top:25px;color: #fff; background-color: #5a5c60;}
+  #section7 {padding-top:25px;color: #fff; background-color: #aa4b33;}
+  {% endif %}
+  {% endif %}
+  #convert {padding-top:25px;color: #fff; background-color: #003e2a;}
+  </style>
+  }
+</head>
+<body data-spy="scroll" data-target=".navbar" data-offset="50">
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#">Relational Database Normalization</a>
+    </div>
+    <div>
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
+          <li><a href="#section1">Input</a></li>
+          <li><a href="#section2">Properties</a></li>
+          {% if res['cvt']>=1 %}
+            <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown">3NF conversion<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#section4">3NF decomposition</a></li>
+              <li><a href="#section5">decomposition properties</a></li>
+            </ul>
+            </li>
+            {% if res['cvt']==2 %}
+              <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown">BCNF conversion<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+              <li><a href="#section6">BCNF decomposition</a></li>
+              <li><a href="#section7">decomposition properties</a></li>
+              </ul>
+              </li>
+            {% endif %}
+          {% endif %}
+          <li><a href="#convert">Convert</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>    
+
+<div id="section1" class="container-fluid">
+  <h1 align="center">Schema and Functional Dependencies</h1>
+	<table class="table-dark table-striped" border="3" align="center">
+	<h4 align="center" style="color:black"><strong>Attributes: </strong></h4>
+	<!-- 
+	{% for attr in schema %}
+	<th></th>
+	{% endfor %} -->
+	<tbody style="color:black">
+	<tr>
+	  {% for attr in res['schema'] %}
+	  <td>{{ attr.name }}</td>
+	  {% endfor %}
+	</tr>
+	</tbody>
+	</table>
+	<br>
+	<h4 style="margin-left: 224px; position: absolute; display: inline-grid;">Functional Depenendencies given:</h4>
+	<ol style="color:black;margin-left: 200px;margin-top: 34px; display: inline-grid;">
+	{% for key in res['fdicts'] %}
+		{% for rs in res['fdicts'][key] %}
+			<li>{{ key }}  --->   {{ rs }}</li>
+		{% endfor %}
+	{% endfor %}
+  <br>
+	</ol>
+	<h4 style="margin-left: 424px;position:absolute; display: inline-grid;">Super keys: </h4>
+	<ul style="color:black;margin-left: 400px; display: inline-grid">
+	{% for key in res['skeys'] %}
+		<li>{{ key }}</li>
+	{% endfor %}
+	</ul>
+</div>
+<div id="section2" class="container-fluid">
+  <h1 align="center">Database properties</h1>
+  <div class="list-group" style="color:black">
+    <h4 style="margin-left: 224px;"> Highest Normal form satisfied by the Relation: <strong>{{ res['hnf'] }}</strong></h4>
+   <h4 style="margin-left: 224px; position: absolute; display: inline-grid;"> <strong>Closure of FDs</strong></h4>
+    <ol style="color:black;margin-left: 200px;margin-top: 34px; display: inline-grid;">
+    {% for key in res['closure'] %}
+      {% for rs in res['closure'][key] %}
+        <li>{{ key }}  --->   {{ rs }}</li>
+      {% endfor %}
+    {% endfor %}
+    <br>
+    </ol>
+    <h4 style="margin-left: 424px;position:absolute; display: inline-grid;"><strong>FDs not in BCNF</strong></h4>
+    <ul style="color:black;margin-left: 400px; display: inline-grid">
+    {% for key in res['notvalid'] %} Relation: {{ key }} <br>
+      {% for fdkey in res['notvalid'][key] %}
+        {% for rs in res['notvalid'][key][fdkey] %}
+        <li><strong>{{ fdkey }}  --->   {{ rs[0] }}</strong>; satisfies <strong>{{ rs[1] }}NF</strong></li>
+        {% endfor %}
+      {% endfor %}
+    {% endfor %}
+    <br>
+    <br>
+    </ul>
+  </div>
+</div>
+{% if res['cvt']>=1 %}
+<div id="section4" class="container-fluid">
+  <h2 align="center">To achieve 3NF</h2>
+  {% for key in res['3nfo'].relations.relations_dict.keys() %}
+    <h4 style="color: black;"><strong>Relation: {{ key }} </strong></h4>
+    <table class="table-dark table-striped" border="3" align="center">
+    <h4 align="center" style="color:black"><strong>Attributes: </strong></h4>
+    <tbody style="color:black">
+    <tr>
+      {% for attr in res['3nfo'].relations.relations_dict[key].relation %}
+      <td>{{ attr.name }}</td>
+      {% endfor %}
+    </tr>
+    </tbody>
+    </table>
+    <h4 style="margin-left: 224px; position: absolute; display: inline-grid;">List of FDs:</h4>
+    <ol style="color:black;margin-left: 200px;margin-top: 34px; display: inline-grid;">
+    {% for fdkey in res['3nfo'].relations.relations_dict[key].fd_dict[key].keys() %}
+      {% for rs in res['3nfo'].relations.relations_dict[key].fd_dict[key][fdkey] %}
+        <li>{{ fdkey }}  --->   {{ rs }}</li>
+      {% endfor %}
+    {% endfor %}
+    <br>
+    </ol>
+    <h4 style="margin-left: 524px">Super keys: </h4>
+    <ul style="color:black;margin-left: 500px;">
+    {% for skey in res['3nfo'].relations.relations_dict[key].super_keys %}
+      <li>{{ skey }}</li>
+    {% endfor %}
+    </ul>
+    <br>
+  {% endfor %}
+</div>
+<div id="section5" class="container-fluid">
+  <h1 align="center">3NF Decomposition</h1>
+  <div class="list-group" style="color:black">
+    <h4 align="center">Decomposition has a lossless join: {{ res['3lj'] }}</h4>
+    <h4 align="center">Decomposition is dependency preserving: {{ res['3dp'] }}</h4>
+  </div>
+</div>
+{% if res['cvt']==2 %}
+<div id="section6" class="container-fluid">
+  <h2 align="center">To achieve BCNF</h2>
+  {% for key in res['bcnfo'].relations.relations_dict.keys() %}
+    <h4 style="color: black;"><strong>Relation: {{ key }} </strong></h4>
+    <table class="table-dark table-striped" border="3" align="center">
+    <h4 align="center" style="color:black"><strong>Attributes: </strong></h4>
+    <tbody style="color:black">
+    <tr>
+      {% for attr in res['bcnfo'].relations.relations_dict[key].relation %}
+      <td>{{ attr.name }}</td>
+      {% endfor %}
+    </tr>
+    </tbody>
+    </table>
+    <h4 style="margin-left: 224px; position: absolute; display: inline-grid;">List of FDs:</h4>
+    <ol style="color:black;margin-left: 200px;margin-top: 34px; display: inline-grid;">
+    {% for fdkey in res['bcnfo'].relations.relations_dict[key].fd_dict[key].keys() %}
+      {% for rs in res['bcnfo'].relations.relations_dict[key].fd_dict[key][fdkey] %}
+        <li>{{ fdkey }}  --->   {{ rs }}</li>
+      {% endfor %}
+    {% endfor %}
+    <br>
+    </ol>
+    <h4 style="margin-left: 524px">Super keys: </h4>
+    <ul style="color:black;margin-left: 500px;">
+    {% for skey in res['bcnfo'].relations.relations_dict[key].super_keys %}
+      <li>{{ skey }}</li>
+    {% endfor %}
+    </ul>
+  {% endfor %}
+</div>
+<div id="section7" class="container-fluid">
+  <h1 align="center">BCNF Decomposition</h1>
+  <div class="list-group" style="color:black">
+    <h4 align="center">Decomposition has a lossless join: {{ res['blj'] }}</h4>
+    <h4 align="center">Decomposition is dependency preserving: {{ res['bdp'] }}</h4>
+  </div>
+</div>
+{% endif %}
+{% endif %}
+<div id="convert" class="container-fluid">
+  <h1 align="center">Convert to higher Normal Forms</h1>
+  <br>
+  <h4 style="color:black;margin-left: 200px;"> Alter the schema for a better design, and to reduce the chance of updation,deletion anomailes.</h4>
+  <br>      
+  <div class="list-group" style="color:black;margin-left: 200px;">
+    {% if res['hnf']=="BCNF" or res['cvt']==2 %}
+      <h4 style="color:black;"> Relations already in BCNF </h4>
+    {% else %}
+    <form action="/normalize" method="post">
+      <div class="form-group">
+      {% if res['hnf']!="3NF" and res['cvt']==0 %}
+        <div class="radio">
+          <label>
+            <input type="radio" name="cvt" id="cvt" value="option1">
+              Normalize to 3NF.
+          </label>
+        </div>
+      {% endif %}
+        <div class="radio">
+          <label>
+            <input type="radio" name="cvt" id="cvt" value="option2" checked>
+              Normalize to BCNF.
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-sm btn-success">Convert</button>
+      </div>
+    </form>
+    {% endif %}
+    <br>
+  </div>
+</div>
+</body>
+</html>

@@ -2,11 +2,9 @@ import re
 import copy
 import time
 class Relations:
-	def __init__(self):
-		file=open("input/schema3.txt","r")
-		self.relations_dict={}
-		str=file.readlines()
-		for s in str:
+	def __init__(self,input):
+		self.relations_dict = {}
+		for s in input:
 			stri=re.findall(r"[\w']+",s)
 			#print(type(s))
 			self.relations_dict[stri[0]]=Relation(s)
@@ -24,7 +22,7 @@ class Constraints:
 
 class Relation:
 
-	def __init__(self,s=None,pkey=None,list_of_attributes=None,relation_obj=None,rname=None):
+	def __init__(self,s=None,pkey=None,list_of_attributes=None,relation_obj=None,rname=None,sinput=None):
 		if(s is None):
 			str=[]
 			str.append(rname)
@@ -76,11 +74,15 @@ class Relation:
 		if s not in self.super_keys:
 			self.super_keys.append(s)
 
-	def _set_fds_(self,rname,notvalid_dict=None):
+	def _set_fds_(self,rname,notvalid_dict=None,sinput=None):
 		if notvalid_dict is None:
-			fd_file=open("input/fd3.txt","r")			
+			fds = None
 			self.fd_dict[rname]={}
-			fds=fd_file.readlines()
+			if(sinput is None):
+				fd_file=open("input/fd.txt","r")			
+				fds=fd_file.readlines()
+			else:
+				fds = copy.deepcopy(sinput)
 			str=[]
 			for s in fds:
 				str.extend(s.split(";"))
@@ -148,36 +150,32 @@ class check_NF:
 		self.notvalid={}
 		self.rname=rname
 
-	def getNF_fd(self,fd):
+	def getNF_fd(self,fd,rs,rel):
 		vkeys=[]
-		for key in self.relations.relations_dict[self.rname].super_keys:
+		for key in self.relations.relations_dict[rel].super_keys:
 			vkeys.extend(key.split("&"))
 		k=0
 		c=0
 		cnf=4
-		for item in self.relations.relations_dict:
-			if(item==self.rname):
-				for key in self.relations.relations_dict[self.rname].super_keys:
-					pkeys=key.split("&")
-					fdkeys=fd.split("&")
-					if(fd==key or set(pkeys).issubset(set(fdkeys))):
-						cnf = min(cnf,4)
+		for key in self.relations.relations_dict[rel].super_keys:
+			pkeys=key.split("&")
+			fdkeys=fd.split("&")
+			if(fd==key or set(pkeys).issubset(set(fdkeys))):
+				cnf = min(cnf,4)
 
-					elif(set(fdkeys).issubset(set(pkeys))):
-						for ele in self.relations.relations_dict[self.rname].fd_dict[self.rname][fd]:
-							if ele not in vkeys:
-								self.notvalid[fd].append(ele)
-								cnf = min(cnf,1)
-						cnf = min(cnf,3)
-						self.notvalid[fd].append(ele)
+			elif(set(fdkeys).issubset(set(pkeys))):
+				if rs not in vkeys:
+					#self.notvalid[fd].append(ele)
+					cnf = min(cnf,1)
+				cnf = min(cnf,3)
+				#self.notvalid[fd].append(ele)
 
-					else:
-						for ele in self.relations.relations_dict[self.rname].fd_dict[self.rname][fd]:
-							if ele not in vkeys:
-								self.notvalid[fd].append(ele)
-								cnf = min(cnf,2)
-						cnf=min(cnf,3)
-						self.notvalid[fd].append(ele)
+			else:
+				if rs not in vkeys:
+					#self.notvalid[fd].append(ele)
+					cnf = min(cnf,2)
+				cnf=min(cnf,3)
+				#self.notvalid[fd].append(ele)
 		return cnf
 
 	
@@ -387,7 +385,9 @@ class check_NF:
 						x1.isPPKA=False			
 					keylo={}
 					keylo[x]=self.notvalid[klist[i]][x]
+					self.relations.relations_dict[strin].super_keys = []
 					self.relations.relations_dict[strin]._set_fds_(strin,keylo)
+					self.relations.relations_dict[strin]._set_composite(self.relations,strin)
 				for fd in self.relations.relations_dict[klist[i]].fd_dict[klist[i]]:
 					k=0
 					if '&' in fd:
@@ -421,7 +421,9 @@ class check_NF:
 							self.relations.relations_dict[klist[i]].fd_dict[klist[i]][fd].pop(ind)
 						else:
 							ind = ind + 1
-			self.relations.relations_dict[klist[i]].fd_dict[klist[i]]={k:v for k,v in self.relations.relations_dict[klist[i]].fd_dict[klist[i]].items() if not len(v)==0}	
+			self.relations.relations_dict[klist[i]].fd_dict[klist[i]]={k:v for k,v in self.relations.relations_dict[klist[i]].fd_dict[klist[i]].items() if not len(v)==0}
+			self.relations.relations_dict[klist[i]].super_keys = []
+			self.relations.relations_dict[klist[i]]._set_composite(self.relations,klist[i])	
 			i=i+1
 
 

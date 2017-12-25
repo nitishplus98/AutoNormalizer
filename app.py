@@ -50,7 +50,6 @@ def properties():
 @app.route("/normalize",methods=['POST'])
 def normalize():
 	resp={}
-	print("hello here")
 	query = saved_query['schema']
 	sinput = query.strip().split('\n')
 	for i in range(len(sinput)):
@@ -98,7 +97,6 @@ def normalize():
 	obj = Decomposition_Properties(nf.relations,pfds)
 	resp['blj'] = obj.lossless_join_before()
 	resp['bdp'] = obj.dependency_preserving_after()
-	print("hello there")
 	return render_template('main.html',res=resp)
 
 if(__name__ == "__main__"):

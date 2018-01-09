@@ -86,6 +86,9 @@ def normalize():
 	resp['hnf'] = copy.deepcopy(nf.get_nf())
 	if (not nf.check_2nf()) or (not nf.check_3nf()):
 		nf.oneNF_to_2NF_3NF()
+		nf.notvalid = {}
+		if(not nf.check_3nf()):
+			nf.oneNF_to_2NF_3NF()
 	resp['3nfo'] = copy.deepcopy(nf)
 	obj = Decomposition_Properties(nf.relations,pfds)
 	resp['3lj'] = obj.lossless_join_before()

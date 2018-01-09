@@ -2,10 +2,10 @@ from Relation import *
 from time import sleep
 import sys
 #fds=functional_dependencies(key)
-file = open("input/schema.txt","r")
+file = open("input/schema3.txt","r")
 relations=Relations(file.readlines())
 file.close()
-file = open("input/fd.txt","r")
+file = open("input/fd3.txt","r")
 relations.relations_dict["test"]._set_fds_("test",sinput=file.readlines())
 file.close()
 print("----------------------------------------------")
@@ -58,6 +58,9 @@ pfds = copy.deepcopy(nf.relations.relations_dict["test"].fd_dict["test"])
 flag = None
 if not nf.check_2nf():
 	nf.oneNF_to_2NF_3NF()
+	nf.notvalid = {}
+	if not nf.check_3nf():
+		nf.oneNF_to_2NF_3NF()
 	flag = True
 # elif not nf.check_3nf():
 # 	nf.oneNF_to_2NF_3NF()
